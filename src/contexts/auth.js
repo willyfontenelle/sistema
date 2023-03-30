@@ -11,12 +11,18 @@ function AuthProvider({ children }){
     alert("LOGADO COM SUCESSO")
   }
 
+  // Cadastrar um novo user
+  function signUp(email, password, name){
+    console.log(name);
+  }
+
   return(
     <AuthContext.Provider 
       value={{
         signed: !!user,
         user,
-        signIn
+        signIn,
+        signUp
       }}
     >
       {children}
