@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from 'react';
-import { auth, db, storage } from '../services/firebaseConnection';
+import { auth, db } from '../services/firebaseConnection';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 
@@ -15,19 +15,24 @@ function AuthProvider({ children }){
 
   const navigate = useNavigate();
 
+
   useEffect(() => {
     async function loadUser(){
       const storageUser = localStorage.getItem('@ticketsPRO')
 
       if(storageUser){
-        setUser(JSON.parse(storageUser));
+        setUser(JSON.parse(storageUser))
         setLoading(false);
       }
+
+
       setLoading(false);
+
     }
 
     loadUser();
   }, [])
+
 
   async function signIn(email, password){
     setLoadingAuth(true);
@@ -39,7 +44,7 @@ function AuthProvider({ children }){
       const docRef = doc(db, "users", uid);
       const docSnap = await getDoc(docRef)
 
-      let data ={
+      let data = {
         uid: uid,
         nome: docSnap.data().nome,
         email: value.user.email,
@@ -49,18 +54,17 @@ function AuthProvider({ children }){
       setUser(data);
       storageUser(data);
       setLoadingAuth(false);
-      toast.success("Bem-vindo de volta");
+      toast.success("Bem-vindo(a) de volta!")
       navigate("/dashboard")
-
     })
     .catch((error) => {
       console.log(error);
       setLoadingAuth(false);
-      toast.error("Ops algo deu errado");
-    })
-
+      toast.error("Ops algo deu errado!");
+    }) 
 
   }
+
 
   // Cadastrar um novo user
   async function signUp(email, password, name){
@@ -68,32 +72,38 @@ function AuthProvider({ children }){
 
     await createUserWithEmailAndPassword(auth, email, password)
     .then( async (value) => {
-      let uid = value.user.uid
+        let uid = value.user.uid
 
-      await setDoc(doc(db, "users", uid), {
-        nome: name,
-        avatarUrl: null
-      })
-      .then( () => {
-        let data = {
-          uid: uid,
+        await setDoc(doc(db, "users", uid), {
           nome: name,
-          email: value.user.email,
           avatarUrl: null
-        };
-        setUser(data);
-        storageUser(data);
-        setLoadingAuth(false);
-        toast.success("Seja bem-vindo ao sistema!")
-        navigate("/dashboard")
-      })
+        })
+        .then( () => {
+
+          let data = {
+            uid: uid,
+            nome: name,
+            email: value.user.email,
+            avatarUrl: null
+          };
+
+          setUser(data);
+          storageUser(data);
+          setLoadingAuth(false);
+          toast.success("Seja bem-vindo ao sistema!")
+          navigate("/dashboard")
+          
+        })
+
 
     })
     .catch((error) => {
       console.log(error);
       setLoadingAuth(false);
     })
+
   }
+
 
   function storageUser(data){
     localStorage.setItem('@ticketsPRO', JSON.stringify(data))

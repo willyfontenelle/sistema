@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext  } from 'react'
 import logo from '../../assets/logo.png';
 import { Link } from 'react-router-dom'
 
@@ -11,11 +11,11 @@ export default function SignUp(){
 
   const { signUp, loadingAuth } = useContext(AuthContext);
 
-  function handleSubmit(e){
+  async function handleSubmit(e){
     e.preventDefault();
 
     if(name !== '' && email !== '' && password !== ''){
-      signUp(email, password, name)
+     await signUp(email, password, name)
     }
 
   }
