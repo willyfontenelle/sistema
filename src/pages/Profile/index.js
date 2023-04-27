@@ -66,8 +66,7 @@ export default function Profile() {
 
               setUser(data);
               storageUser(data);
-              toast.success("Atualizado com sucesso!")
-
+              toast.success("Atualizado com sucesso!");
 
             })
         })
