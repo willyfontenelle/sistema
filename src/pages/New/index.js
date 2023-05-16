@@ -4,9 +4,10 @@ import Title from '../../components/Title';
 
 import { AuthContext } from '../../contexts/auth'
 import { db } from '../../services/firebaseConnection'
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, addDoc } from 'firebase/firestore'
 
 import { FiPlusCircle } from 'react-icons/fi'
+import { toast } from 'react-toastify'
 
 import './new.css';
 
@@ -71,6 +72,30 @@ export default function New() {
         setCustomerSelected(e.target.value)
     }
 
+    async function handleRegister(e){
+        e.preventDefault();
+
+        //Registrar um chamado
+        await addDoc(collection(db, "chamados"), {
+            created: new Date(),
+            cliente: customers[customerSelected].nomeFantasia,
+            clienteId: customers[customerSelected].id,
+            assunto: assunto,
+            complemento: complemento,
+            status: status,
+            userId: user.uid,
+        })
+        .then(() => {
+            toast.success("Chamado registrado!")
+            setComplemento('')
+            setCustomerSelected(0)            
+        })
+        .catch((error) => {
+            toast.error("Ops erro ao registrar, tente mais tarde!")
+            console.log(error);
+        })
+    }
+
     return (
         <div>
             <Header />
@@ -80,7 +105,7 @@ export default function New() {
                 </Title>
 
                 <div className="container">
-                    <form className="form-profile">
+                    <form className="form-profile" onSubmit={handleRegister}>
 
                         <label>Clientes</label>
                         {
@@ -141,10 +166,10 @@ export default function New() {
                             type="text"
                             placeholder="Descreva seu problema (opcional)."
                             value={complemento}
-                            onCHANGE={(e) => setComplemento(e.target.value)}
+                            onChange={(e) => setComplemento(e.target.value)}
                         />
 
-                        <button type="submnit">Registrar</button>
+                        <button type="submit">Registrar</button>
 
                     </form>
                 </div>
