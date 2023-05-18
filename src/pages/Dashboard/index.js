@@ -10,6 +10,7 @@ import { collection, getDocs, orderBy, limit, startAfter, query } from 'firebase
 import { db } from '../../services/firebaseConnection'
 
 import { format } from 'date-fns'
+import Modal from '../../components/Modal'
 
 import './dashboard.css'
 
@@ -63,7 +64,6 @@ export default function Dashboard() {
         })
       })
 
-      setChamados(chamados => [...chamados, ...lista])
 
       const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] //Pegando o último item
 
@@ -78,8 +78,13 @@ export default function Dashboard() {
 
   }
 
-  function handleMore(){
-    alert("TESTE")
+  async function handleMore(){
+    setLoadingMore(true);
+
+    const q = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
+    const querySnapshot = await getDocs(q);
+    await updateState(querySnapshot);
+
   }
 
   if(loading){
@@ -140,15 +145,18 @@ export default function Dashboard() {
                         <td data-label="Cliente">{item.cliente}</td>
                         <td data-label="Assunto">{item.assunto}</td>
                         <td data-label="Status">
-                          <span className="badge" style={{ backgroundColor: '#999' }}>{item.status}</span></td>
+                          <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : '#999' }}>
+                            {item.status}
+                          </span>
+                        </td>
                         <td data-label="Cadastrado">{item.createdFormat}</td>
                         <td data-label="#">
                           <button className="action" style={{ backgroundColor: '#3583f6' }}>
                             <FiSearch color='#FFF' size={17} />
                           </button>
-                          <button className="action" style={{ backgroundColor: '#f6a935' }}>
-                            <FiEdit2 color='#FFF' size={17} />
-                          </button>
+                            <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935'  }}>
+                              <FiEdit2 color='#FFF' size={17} />
+                            </Link>
                         </td>
                     </tr>
                     )
@@ -156,7 +164,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
               
-              {loadingMore && <h3>Buscando mais chamados</h3>}
+              {loadingMore && <h3>Buscando mais chamados...</h3>}
               {!loadingMore && !isEmpty && <button className="btn-more"onClick={handleMore}>Buscar mais</button>}
 
               
@@ -164,6 +172,9 @@ export default function Dashboard() {
           )}
         </>
       </div>
+
+      <Modal/>
+      
     </div>
   )
 }
