@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [lastDocs, setLastDocs] = useState()
   const [loadingMore, setLoadingMore] = useState(false);
 
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [detail, setDetail] = useState()
+
   useEffect(() => {
     async function loadChamados() {
       const q = query(listRef, orderBy('created', 'desc'), limit(5));
@@ -35,8 +38,6 @@ export default function Dashboard() {
       await updateState(querySnapshot)
 
       setLoading(false);
-
-
     }
 
     loadChamados();
@@ -71,29 +72,33 @@ export default function Dashboard() {
       setLastDocs(lastDoc);
 
 
-    }else{
+    } else {
       setIsEmpty(true);
     }
     setLoadingMore(false);
 
   }
 
-  async function handleMore(){
+  async function handleMore() {
     setLoadingMore(true);
 
     const q = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
     const querySnapshot = await getDocs(q);
     await updateState(querySnapshot);
-
   }
 
-  if(loading){
-    return(
+  function toggleModal(item){
+    setShowPostModal(!showPostModal);
+    setDetail(item);
+  }
+
+  if (loading) {
+    return (
       <div>
-        <Header/>
+        <Header />
         <div cassName="content">
           <Title name="Tickets">
-            <FiMessageSquare size={25}/>
+            <FiMessageSquare size={25} />
           </Title>
 
           <div className='container dashboard'>
@@ -140,7 +145,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {chamados.map((item, index) => {
-                    return(
+                    return (
                       <tr key={index}>
                         <td data-label="Cliente">{item.cliente}</td>
                         <td data-label="Assunto">{item.assunto}</td>
@@ -151,30 +156,36 @@ export default function Dashboard() {
                         </td>
                         <td data-label="Cadastrado">{item.createdFormat}</td>
                         <td data-label="#">
-                          <button className="action" style={{ backgroundColor: '#3583f6' }}>
+                          <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                             <FiSearch color='#FFF' size={17} />
                           </button>
-                            <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935'  }}>
-                              <FiEdit2 color='#FFF' size={17} />
-                            </Link>
+                          <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
+                            <FiEdit2 color='#FFF' size={17} />
+                          </Link>
                         </td>
-                    </tr>
+                      </tr>
                     )
                   })}
                 </tbody>
               </table>
-              
-              {loadingMore && <h3>Buscando mais chamados...</h3>}
-              {!loadingMore && !isEmpty && <button className="btn-more"onClick={handleMore}>Buscar mais</button>}
 
-              
+              {loadingMore && <h3>Buscando mais chamados...</h3>}
+              {!loadingMore && !isEmpty && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+
+
             </>
           )}
         </>
       </div>
 
-      <Modal/>
-      
+      {showPostModal && (
+        <Modal 
+          conteudo={detail}
+          close={ () => setShowPostModal(!setShowPostModal)}
+        />
+      )}
+
+
     </div>
   )
 }
